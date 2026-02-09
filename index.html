@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Karbon Emisyonu Hesaplayıcı</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    p.subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+    }
+    .question {
+      margin-bottom: 25px;
+    }
+    .question h3 {
+      margin-bottom: 10px;
+    }
+    .options label {
+      display: block;
+      margin-bottom: 6px;
+      cursor: pointer;
+    }
+    button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background: #2e7d32;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1b5e20;
+    }
+    .result {
+      margin-top: 30px;
+      padding: 20px;
+      background: #e8f5e9;
+      border-radius: 8px;
+      display: none;
+    }
+    .recommendations {
+      margin-top: 15px;
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 6px;
+      border: 1px solid #c8e6c9;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Karbon Emisyonu Hesaplayıcı</h1>
+    <p class="subtitle">Soruları yanıtlayın, toplam karbon ayak izinizi hesaplayalım</p>
+
+    <!-- Question 1 -->
+    <div class="question">
+      <h3>1. Ulaşım türünüz nedir?</h3>
+      <div class="options">
+        <label><input type="radio" name="transport" value="2"> Toplu taşıma</label>
+        <label><input type="radio" name="transport" value="5"> Benzinli/Dizel araba</label>
+        <label><input type="radio" name="transport" value="1"> Elektrikli araç</label>
+        <label><input type="radio" name="transport" value="0.5"> Bisiklet / Yürüyüş</label>
+      </div>
+    </div>
+
+    <!-- Question 2 -->
+    <div class="question">
+      <h3>2. Aylık ortalama elektrik tüketiminiz?</h3>
+      <div class="options">
+        <label><input type="radio" name="electricity" value="3"> Düşük (yenilenebilir ağırlıklı)</label>
+        <label><input type="radio" name="electricity" value="6"> Orta</label>
+        <label><input type="radio" name="electricity" value="10"> Yüksek</label>
+      </div>
+    </div>
+
+    <!-- Question 3 -->
+    <div class="question">
+      <h3>3. Beslenme şekliniz?</h3>
+      <div class="options">
+        <label><input type="radio" name="food" value="2"> Vejetaryen / Vegan</label>
+        <label><input type="radio" name="food" value="5"> Karışık</label>
+        <label><input type="radio" name="food" value="8"> Et ağırlıklı</label>
+      </div>
+    </div>
+
+    <button onclick="calculateEmission()">Hesapla</button>
+
+    <div class="result" id="result">
+      <h2>Sonuç</h2>
+      <p id="totalEmission"></p>
+      <div class="recommendations" id="recommendations"></div>
+    </div>
+  </div>
+
+  <script>
+    function calculateEmission() {
+      const transport = document.querySelector('input[name="transport"]:checked');
+      const electricity = document.querySelector('input[name="electricity"]:checked');
+      const food = document.querySelector('input[name="food"]:checked');
+
+      if (!transport || !electricity || !food) {
+        alert("Lütfen tüm soruları cevaplayın.");
+        return;
+      }
+
+      const total = parseFloat(transport.value) + parseFloat(electricity.value) + parseFloat(food.value);
+
+      document.getElementById("result").style.display = "block";
+      document.getElementById("totalEmission").innerText = `Tahmini toplam karbon emisyonunuz: ${total.toFixed(1)} ton CO₂ / yıl`;
+
+      let advice = "";
+      if (total <= 6) {
+        advice = "Harika! Karbon ayak iziniz oldukça düşük. Mevcut alışkanlıklarınızı sürdürün.";
+      } else if (total <= 12) {
+        advice = "Orta seviyede bir karbon ayak iziniz var. Ulaşım ve enerji tüketiminde iyileştirme yapabilirsiniz.";
+      } else {
+        advice = "Karbon ayak iziniz yüksek. Et tüketimini azaltmak, toplu taşıma ve yeşil enerjiye geçmek büyük fark yaratır.";
+      }
+
+      document.getElementById("recommendations").innerText = advice;
+    }
+  </script>
+</body>
+</html>
