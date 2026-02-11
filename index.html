@@ -38,6 +38,11 @@
     <div class="progress-bar"><div class="progress-fill" style="width: 25%;"></div></div>
     <h2>Step 1: Shopping & Consumption</h2>
     
+    <p>Which T-shirt would you choose?</p>
+    <label><input type="radio" name="tshirt_choice" value="0" checked> Cotton T-Shirt (Made in Asia)</label>
+    <label><input type="radio" name="tshirt_choice" value="-0.02"> Cotton T-Shirt (Made in Europe)</label>
+    <label><input type="radio" name="tshirt_choice" value="-0.05"> Organic Cotton T-Shirt (Made in Europe)</label>
+
     <p>How often do you go shopping?</p>
     <label><input type="radio" name="shopping_freq" value="0" checked> Only when necessary</label>
     <label><input type="radio" name="shopping_freq" value="0.14"> Sometimes</label>
@@ -206,12 +211,12 @@
   };
 
   function calculateFinal() {
-    let scoreShopping = 0;
-    let scoreNutrition = 0;
-    let scoreTransport = 0;
-
     // 1. Shopping & Consumption
-    ['shopping_freq', 'prod_quality', 'buy_type', 'own_vehicle'].forEach(name => {
+    // Başlangıç değeri 0.54 tCO2e olarak belirlendi
+    let scoreShopping = 0.54; 
+    
+    // T-shirt seçimi ve diğer lifestyle sorularını topla
+    ['tshirt_choice', 'shopping_freq', 'prod_quality', 'buy_type', 'own_vehicle'].forEach(name => {
       const sel = document.querySelector(`input[name="${name}"]:checked`);
       if (sel) scoreShopping += parseFloat(sel.value);
     });
@@ -220,10 +225,11 @@
     const isSmoker = document.querySelector('input[name="do_smoke"]:checked').value === 'yes';
     const cigCount = parseFloat(document.getElementById('smoking_count').value) || 0;
     const smokingAnnualTons = (cigCount * 14 * 365 / 1000000);
-    const smokingAnnualKg = (cigCount * 14 * 365 / 1000); // 1,000,000 mg in kg
+    const smokingAnnualKg = (cigCount * 14 * 365 / 1000); 
     scoreShopping += smokingAnnualTons;
 
     // 2. Nutrition
+    let scoreNutrition = 0;
     const gender = document.querySelector('input[name="gender"]:checked').value;
     const diet = document.querySelector('input[name="diet"]:checked').value;
     const sports = document.querySelector('input[name="sports"]:checked').value;
@@ -237,7 +243,8 @@
     scoreNutrition += nData.base + (weightMult * nData.increase[sports]);
     scoreNutrition += foodOriginTable[foodOrigin][sports];
 
-    // 3. Transportation (Factor * KM * 250 days)
+    // 3. Transportation
+    let scoreTransport = 0;
     const w = 250;
     scoreTransport += (parseFloat(document.getElementById('trans_bus').value) || 0) * 0.000068 * w;
     scoreTransport += (Math.floor((parseFloat(document.getElementById('trans_moped').value) || 0) / 2)) * 0.000001 * w;
@@ -249,14 +256,14 @@
 
     const totalScore = scoreShopping + scoreNutrition + scoreTransport;
 
-    // --- Dynamic Smoking Feedback Logic (Converted to KG) ---
+    // Dynamic Smoking Feedback
     const feedbackEl = document.getElementById('smokingFeedback');
     if (isSmoker && cigCount > 0) {
       feedbackEl.className = "smoke-bonus-box smoker";
-      feedbackEl.innerHTML = `🚬 <strong>Smoking:</strong> Since you smoke ${cigCount} cigarettes per day, you emit approximately <strong>${smokingAnnualKg.toFixed(2)} kg CO₂</strong> per year. For comparison, someone who smokes 10 cigarettes a day releases about 51 kg of CO₂ annually. Reducing your smoking can benefit both your health and the environment.`;
+      feedbackEl.innerHTML = `? <strong>Smoking:</strong> Since you smoke ${cigCount} cigarettes per day, you emit approximately <strong>${smokingAnnualKg.toFixed(2)} kg CO₂</strong> per year. For comparison, someone who smokes 10 cigarettes a day releases about 51 kg of CO₂ annually.`;
     } else {
       feedbackEl.className = "smoke-bonus-box non-smoker";
-      feedbackEl.innerHTML = `✨ <strong>Congratulations:</strong> By not smoking, you protect both the environment and your health! <strong>Did you know?</strong> Someone who smokes 10 cigarettes a day releases about 51 kg of CO₂ annually. By staying smoke-free, you are making a positive impact on the planet.`;
+      feedbackEl.innerHTML = `✨ <strong>Congratulations:</strong> By staying smoke-free, you are making a positive impact on the planet.`;
     }
 
     // Update Result Page
@@ -265,13 +272,8 @@
     document.getElementById('res_transport').innerText = scoreTransport.toFixed(2);
     document.getElementById('totalResult').innerText = totalScore.toFixed(2) + " t CO₂e";
 
-    // Show Result Step
-    document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-    document.getElementById('stepResult').classList.add('active');
-    window.scrollTo(0,0);
+    nextStep('Result');
   }
 </script>
 </body>
 </html>
-
-
