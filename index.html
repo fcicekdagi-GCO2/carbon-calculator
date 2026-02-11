@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CO2 Calculator - Advanced Nutrition</title>
+  <title>Personal Carbon Footprint Calculator</title>
   <style>
     body { font-family: 'Segoe UI', sans-serif; background: #f0f4f3; margin: 0; padding: 20px; display: flex; justify-content: center; }
     .container { max-width: 650px; width: 100%; }
@@ -72,7 +72,12 @@
     <label><input type="radio" name="sports" value="little"> Little Sport</label>
     <label><input type="radio" name="sports" value="regular"> Regular Sport</label>
 
-    <p>4. Your Weight (kg)</p>
+    <p>4. Food you buy</p>
+    <label><input type="radio" name="food_origin" value="regional" checked> Regional and seasonal</label>
+    <label><input type="radio" name="food_origin" value="sometimes"> Sometimes regional and seasonal</label>
+    <label><input type="radio" name="food_origin" value="any"> Doesn't matter where it comes from</label>
+
+    <p>5. Your Weight (kg)</p>
     <input type="number" id="weight" value="10" min="10">
 
     <div class="btn-container">
@@ -100,8 +105,8 @@
     if(step === 2) document.getElementById('step2').classList.add('active');
   }
 
-  // Veri Tablosu (Object Literal yapısı ile tabloyu koda aktardık)
-  const lookupTable = {
+  // Beslenme ve Kilo Artış Tablosu
+  const nutritionTable = {
     male: {
       vegan: { base: 0, increase: { no: 0, little: 0, regular: 0 } },
       vegetarian: { base: 0.33, increase: { no: 0.1, little: 0.11, regular: 0.12 } },
@@ -122,36 +127,48 @@
     }
   };
 
+  // Gıda Alışveriş Tercihi Tablosu (Spor bazlı)
+  const foodOriginTable = {
+    regional: { no: 0, little: 0, regular: 0 },
+    sometimes: { no: 0.07, little: 0.08, regular: 0.11 },
+    any: { no: 0.18, little: 0.2, regular: 0.21 }
+  };
+
   function calculateAdvancedTotal() {
-    let shoppingScore = 0;
+    let totalScore = 0;
+
+    // 1. Alışveriş Bölümü
     ['shopping', 'tshirt', 'vehicle'].forEach(name => {
       const sel = document.querySelector(`input[name="${name}"]:checked`);
-      if (sel) shoppingScore += parseFloat(sel.value);
+      if (sel) totalScore += parseFloat(sel.value);
     });
 
-    // Seçimleri al
+    // 2. Seçimleri al
     const gender = document.querySelector('input[name="gender"]:checked').value;
     const diet = document.querySelector('input[name="diet"]:checked').value;
     const sports = document.querySelector('input[name="sports"]:checked').value;
-    const weight = parseFloat(document.getElementById('weight').value) || 0;
+    const foodOrigin = document.querySelector('input[name="food_origin"]:checked').value;
+    const weight = parseFloat(document.getElementById('weight').value) || 10;
 
-    // Tablodan verileri çek
-    const data = lookupTable[gender][diet];
-    const baseValue = data.base;
-    const increaseRate = data.increase[sports];
-
-    // Formül: Base + ((Kilo - 10) / 10 * Artış)
-    // İlk 10 kg base içindedir, sonrasındaki her 10 kg için artış eklenir.
+    // 3. Beslenme & Kilo Hesabı
+    const nData = nutritionTable[gender][diet];
+    const baseValue = nData.base;
+    const weightIncreaseRate = nData.increase[sports];
+    
     let weightMultiplier = Math.floor((weight - 10) / 10);
     if (weightMultiplier < 0) weightMultiplier = 0;
+    
+    const nutritionResult = baseValue + (weightMultiplier * weightIncreaseRate);
+    totalScore += nutritionResult;
 
-    const nutritionScore = baseValue + (weightMultiplier * increaseRate);
-    const finalScore = shoppingScore + nutritionScore;
+    // 4. Gıda Alışveriş Tercihi Hesabı (Yeni tablo)
+    const foodOriginScore = foodOriginTable[foodOrigin][sports];
+    totalScore += foodOriginScore;
 
     // Sonucu göster
     document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
     document.getElementById('stepResult').classList.add('active');
-    document.getElementById('totalResult').innerText = finalScore.toFixed(2) + " t CO₂e";
+    document.getElementById('totalResult').innerText = totalScore.toFixed(2) + " t CO₂e";
   }
 </script>
 
