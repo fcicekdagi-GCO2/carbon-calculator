@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Personal Carbon Footprint Calculator</title>
+  <title>Global Carbon Footprint Calculator</title>
   <style>
     body { font-family: 'Segoe UI', sans-serif; background: #f0f4f3; margin: 0; padding: 20px; display: flex; justify-content: center; }
-    .container { max-width: 650px; width: 100%; }
+    .container { max-width: 700px; width: 100%; }
     h1 { text-align: center; color: #2f5d50; }
     .section { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none; }
     .active { display: block; }
@@ -14,13 +14,15 @@
     .progress-fill { height: 100%; background: #2f5d50; border-radius: 4px; transition: width 0.3s; }
     p { font-weight: bold; margin-top: 20px; color: #444; }
     label { display: block; padding: 10px; margin: 5px 0; background: #f9f9f9; border: 1px solid #eee; border-radius: 6px; cursor: pointer; }
-    label:hover { background: #eef2f1; }
-    input[type="number"] { width: 100%; padding: 12px; border-radius: 6px; border: 2px solid #2f5d50; box-sizing: border-box; font-size: 16px; margin-top: 10px; }
+    .input-group { display: flex; align-items: center; justify-content: space-between; background: #fff; padding: 10px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 8px; }
+    .input-group span { flex: 1; font-size: 0.95em; color: #333; }
+    .input-group input[type="number"] { width: 80px; padding: 8px; border: 2px solid #2f5d50; border-radius: 4px; text-align: center; }
+    input[type="number"]:focus { outline: none; background: #f0f7f5; }
     .btn-container { margin-top: 30px; display: flex; justify-content: space-between; }
     button { padding: 12px 25px; font-size: 16px; background: #2f5d50; color: white; border: none; border-radius: 6px; cursor: pointer; }
     button.secondary { background: #888; }
-    .result-box { text-align: center; padding: 20px; background: #e8f5e9; border-radius: 8px; margin-top: 20px; }
-    #totalResult { font-size: 1.8em; color: #2f5d50; font-weight: bold; }
+    .result-box { text-align: center; padding: 30px; background: #e8f5e9; border-radius: 12px; margin-top: 20px; border: 2px solid #2f5d50; }
+    #totalResult { font-size: 2.2em; color: #2f5d50; font-weight: bold; }
     .hidden { display: none; }
     .smoke-detail { margin-top: 15px; padding: 15px; border-left: 4px solid #2f5d50; background: #fdfdfd; }
   </style>
@@ -31,7 +33,7 @@
   <h1>CO₂ Calculator</h1>
 
   <div class="section active" id="step1">
-    <div class="progress-bar"><div class="progress-fill" style="width: 50%;"></div></div>
+    <div class="progress-bar"><div class="progress-fill" style="width: 33%;"></div></div>
     <h2>Step 1: Shopping & Consumption</h2>
     
     <p>How often do you go shopping?</p>
@@ -42,22 +44,15 @@
     <p>Do you smoke?</p>
     <label><input type="radio" name="do_smoke" value="no" checked onclick="toggleSmoking(false)"> No</label>
     <label><input type="radio" name="do_smoke" value="yes" onclick="toggleSmoking(true)"> Yes</label>
-
     <div id="smoking_input_container" class="hidden smoke-detail">
       <p>How many cigarettes do you smoke daily?</p>
       <input type="number" id="smoking_count" value="0" min="0">
-      <p style="font-size: 0.8em; font-weight: normal; color: #666;">*Each cigarette contributes approx. 14g CO₂e</p>
     </div>
 
     <p>Which T-shirt would you choose?</p>
     <label><input type="radio" name="tshirt" value="0" checked> Cotton (Asia)</label>
     <label><input type="radio" name="tshirt" value="-0.02"> Cotton (Europe)</label>
     <label><input type="radio" name="tshirt" value="-0.05"> Organic (Europe)</label>
-
-    <p>Motorized Vehicle</p>
-    <label><input type="radio" name="vehicle" value="0" checked> No / I share</label>
-    <label><input type="radio" name="vehicle" value="0.08"> Motorcycle</label>
-    <label><input type="radio" name="vehicle" value="0.24"> Car</label>
 
     <div class="btn-container">
       <span></span>
@@ -66,7 +61,7 @@
   </div>
 
   <div class="section" id="step2">
-    <div class="progress-bar"><div class="progress-fill" style="width: 100%;"></div></div>
+    <div class="progress-bar"><div class="progress-fill" style="width: 66%;"></div></div>
     <h2>Step 2: Nutrition & Activity</h2>
     
     <p>1. Gender</p>
@@ -88,25 +83,45 @@
     <p>4. Food you buy</p>
     <label><input type="radio" name="food_origin" value="regional" checked> Regional and seasonal</label>
     <label><input type="radio" name="food_origin" value="sometimes"> Sometimes regional and seasonal</label>
-    <label><input type="radio" name="food_origin" value="any"> Doesn't matter where it comes from</label>
+    <label><input type="radio" name="food_origin" value="any"> Doesn't matter</label>
 
     <p>5. Your Weight (kg)</p>
     <input type="number" id="weight" value="" min="10">
 
     <div class="btn-container">
       <button class="secondary" onclick="nextStep(1)">Back</button>
-      <button onclick="calculateAdvancedTotal()">Show Final Result</button>
+      <button onclick="nextStep(3)">Next: Transportation ➔</button>
+    </div>
+  </div>
+
+  <div class="section" id="step3">
+    <div class="progress-bar"><div class="progress-fill" style="width: 100%;"></div></div>
+    <h2>Step 3: Transportation</h2>
+    <p>How many kilometers (km) do you travel in a normal week?</p>
+
+    <div class="input-group"><span>On foot or by bicycle</span><input type="number" id="trans_foot" value="0"></div>
+    <div class="input-group"><span>By bus or train</span><input type="number" id="trans_bus" value="0"></div>
+    <div class="input-group"><span>By scooter or moped (2km rule)</span><input type="number" id="trans_moped" value="0"></div>
+    <div class="input-group"><span>By E-scooter / E-bike</span><input type="number" id="trans_ebike" value="0"></div>
+    <div class="input-group"><span>By motorcycle</span><input type="number" id="trans_motor" value="0"></div>
+    <div class="input-group"><span>By Petrol / Diesel car</span><input type="number" id="trans_car" value="0"></div>
+    <div class="input-group"><span>By E-car</span><input type="number" id="trans_ecar" value="0"></div>
+    <div class="input-group"><span>By Plug-in hybrid car</span><input type="number" id="trans_hybrid" value="0"></div>
+
+    <div class="btn-container">
+      <button class="secondary" onclick="nextStep(2)">Back</button>
+      <button onclick="calculateFinal()">Calculate Result</button>
     </div>
   </div>
 
   <div class="section" id="stepResult">
-    <h2>Your Results</h2>
+    <h2>Your Annual Carbon Footprint</h2>
     <div class="result-box">
-      <p>Estimated Annual Carbon Footprint:</p>
       <div id="totalResult">0.00 t CO₂e</div>
+      <p style="font-weight: normal; margin-top: 10px;">Tonnes of CO2 equivalent per year</p>
     </div>
     <div class="btn-container">
-      <button onclick="location.reload()">Restart</button>
+      <button onclick="location.reload()" style="width: 100%;">Restart Calculation</button>
     </div>
   </div>
 </div>
@@ -114,18 +129,12 @@
 <script>
   function nextStep(step) {
     document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-    if(step === 1) document.getElementById('step1').classList.add('active');
-    if(step === 2) document.getElementById('step2').classList.add('active');
+    document.getElementById('step' + step).classList.add('active');
   }
 
   function toggleSmoking(show) {
     const container = document.getElementById('smoking_input_container');
-    if (show) {
-      container.classList.remove('hidden');
-    } else {
-      container.classList.add('hidden');
-      document.getElementById('smoking_count').value = 0; // No denirse sıfırla
-    }
+    show ? container.classList.remove('hidden') : container.classList.add('hidden');
   }
 
   const nutritionTable = {
@@ -155,21 +164,18 @@
     any: { no: 0.18, little: 0.2, regular: 0.21 }
   };
 
-  function calculateAdvancedTotal() {
-    let totalScore = 0;
+  function calculateFinal() {
+    let score = 0;
 
-    // 1. Standart Alışveriş Seçimleri
-    ['shopping', 'tshirt', 'vehicle'].forEach(name => {
+    // 1. Shopping & Smoking
+    ['shopping', 'tshirt'].forEach(name => {
       const sel = document.querySelector(`input[name="${name}"]:checked`);
-      if (sel) totalScore += parseFloat(sel.value);
+      if (sel) score += parseFloat(sel.value);
     });
+    const smokeVal = (parseFloat(document.getElementById('smoking_count').value) || 0) * 14 * 365 / 1000000;
+    score += smokeVal;
 
-    // 2. Sigara Hesaplama (14g * Adet * 365 / 1,000,000)
-    const smokingCount = parseFloat(document.getElementById('smoking_count').value) || 0;
-    const smokingAnnual = (smokingCount * 14 * 365) / 1000000;
-    totalScore += smokingAnnual;
-
-    // 3. Nutrition Verileri
+    // 2. Nutrition & Weight
     const gender = document.querySelector('input[name="gender"]:checked').value;
     const diet = document.querySelector('input[name="diet"]:checked').value;
     const sports = document.querySelector('input[name="sports"]:checked').value;
@@ -177,19 +183,27 @@
     const weight = parseFloat(document.getElementById('weight').value) || 10;
 
     const nData = nutritionTable[gender][diet];
-    const baseValue = nData.base;
-    const weightIncreaseRate = nData.increase[sports];
+    let weightMult = Math.floor((weight - 10) / 10);
+    if (weightMult < 0) weightMult = 0;
     
-    let weightMultiplier = Math.floor((weight - 10) / 10);
-    if (weightMultiplier < 0) weightMultiplier = 0;
-    
-    totalScore += baseValue + (weightMultiplier * weightIncreaseRate);
-    totalScore += foodOriginTable[foodOrigin][sports];
+    score += nData.base + (weightMult * nData.increase[sports]);
+    score += foodOriginTable[foodOrigin][sports];
 
-    // Final Sonucu Yazdır
+    // 3. Transportation (Weekly km * 52 weeks * factor)
+    const weeks = 52;
+    score += (parseFloat(document.getElementById('trans_foot').value) || 0) * 0 * weeks;
+    score += (parseFloat(document.getElementById('trans_bus').value) || 0) * 0.000068 * weeks;
+    score += (Math.floor((parseFloat(document.getElementById('trans_moped').value) || 0) / 2)) * 0.000001 * weeks; // Every 2km
+    score += (parseFloat(document.getElementById('trans_ebike').value) || 0) * 0.000043 * weeks;
+    score += (parseFloat(document.getElementById('trans_motor').value) || 0) * 0.0001 * weeks;
+    score += (parseFloat(document.getElementById('trans_car').value) || 0) * 0.000194 * weeks;
+    score += (parseFloat(document.getElementById('trans_ecar').value) || 0) * 0.000091 * weeks;
+    score += (parseFloat(document.getElementById('trans_hybrid').value) || 0) * 0.0001 * weeks;
+
+    // Display Final
     document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
     document.getElementById('stepResult').classList.add('active');
-    document.getElementById('totalResult').innerText = totalScore.toFixed(2) + " t CO₂e";
+    document.getElementById('totalResult').innerText = score.toFixed(2) + " t CO₂e";
   }
 </script>
 
